@@ -1,0 +1,41 @@
+{
+  "_note": "On-demand USD/hour. Prices change and vary by region: re-check before reporting and update 'checked'. Spot/reserved pricing can be 50-90% lower.",
+  "checked": "2026-11-20",
+  "instances": {
+    "aws_c5.xlarge": {
+      "kind": "cpu", "usd_per_hour": 0.17,
+      "hardware": "4 vCPU Intel Xeon, 8 GiB", "region": "us-east-1",
+      "source": "https://instances.vantage.sh/aws/ec2/c5.xlarge"
+    },
+    "aws_c5.4xlarge": {
+      "kind": "cpu", "usd_per_hour": 0.68,
+      "hardware": "16 vCPU Intel Xeon, 32 GiB", "region": "us-east-1",
+      "source": "https://instances.vantage.sh/aws/ec2/c5.4xlarge"
+    },
+    "aws_g4dn.xlarge": {
+      "kind": "gpu", "usd_per_hour": 0.526,
+      "hardware": "1x NVIDIA T4 16 GB, 4 vCPU", "region": "us-east-1",
+      "source": "https://instances.vantage.sh/aws/ec2/g4dn.xlarge"
+    },
+    "aws_p3.2xlarge": {
+      "kind": "gpu", "usd_per_hour": 3.06,
+      "hardware": "1x NVIDIA V100 16 GB, 8 vCPU", "region": "us-east-1",
+      "source": "https://instances.vantage.sh/aws/ec2/p3.2xlarge"
+    },
+    "gcp_colab_enterprise_t4": {
+      "kind": "gpu", "usd_per_hour": 0.42,
+      "hardware": "NVIDIA T4 accelerator charge only (add VM cost)", "region": "us",
+      "source": "https://cloud.google.com/colab/pricing"
+    },
+    "colab_payg_t4": {
+      "kind": "gpu", "usd_per_hour": 0.12,
+      "hardware": "Colab T4 at ~1.19 compute units/hr x $0.10/unit (community-measured)", "region": "n/a",
+      "source": "https://mccormickml.com/2024/04/23/colab-gpus-features-and-pricing/"
+    },
+    "colab_free_cpu": {
+      "kind": "cpu", "usd_per_hour": 0.0,
+      "hardware": "Colab free tier CPU runtime (usage-limited)", "region": "n/a",
+      "source": "https://colab.research.google.com/signup"
+    }
+  }
+}
