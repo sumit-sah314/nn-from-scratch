@@ -1,4 +1,4 @@
-# numpy-vs-pytorch
+# nn-from-scratch
 
 **Neural networks from scratch in NumPy, benchmarked against PyTorch.**
 
@@ -13,8 +13,8 @@ We implement a fully connected network (MLP), a convolutional network (CNN), and
 | Compute cost (FLOPs) | analytic per-layer counter (`nnbench/flops.py`), cross-checked with `ptflops` / `fvcore` |
 | Dollar cost | measured hours × cloud hourly rates in `configs/pricing.json` (`scripts/cost_report.py`) |
 
-[![tests](https://github.com/sumit-sah314/numpy-vs-pytorch/actions/workflows/tests.yml/badge.svg)](https://github.com/sumit-sah314/numpy-vs-pytorch/actions)
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sumit-sah314/numpy-vs-pytorch/blob/main/notebooks/colab_quickstart.ipynb)
+[![tests](https://github.com/sumit-sah314/nn-from-scratch/actions/workflows/tests.yml/badge.svg)](https://github.com/sumit-sah314/nn-from-scratch/actions)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sumit-sah314/nn-from-scratch/blob/main/notebooks/colab_quickstart.ipynb)
 
 ---
 
@@ -33,8 +33,8 @@ pytest -q        # 23 tests, ~5 s on CPU
 ## Quickstart
 
 ```bash
-git clone https://github.com/sumit-sah314/numpy-vs-pytorch.git
-cd numpy-vs-pytorch
+git clone https://github.com/sumit-sah314/nn-from-scratch.git
+cd nn-from-scratch
 pip install -e ".[torch,dev]"          # or: pip install -r requirements.txt && pip install -e .
 
 make smoke                              # offline end-to-end run on synthetic data
