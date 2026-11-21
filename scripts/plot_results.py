@@ -13,6 +13,7 @@ import os
 from collections import defaultdict
 
 import matplotlib
+import numpy as np
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -31,23 +32,46 @@ def label(cfg: dict) -> str:
     return f"{cfg['framework']}-{dev} / {cfg['optimizer']}"
 
 
-def plot_convergence(runs: list[dict], out: str) -> None:
+def group_by_config(runs: list[dict]) -> dict:
+    """(arch, dataset, framework-device, optimizer) -> list of runs, one per seed."""
     groups = defaultdict(list)
     for r in runs:
-        groups[(r["config"]["arch"], r["config"]["dataset"])].append(r)
-    for (arch, ds), rs in groups.items():
+        c = r["config"]
+        groups[(c["arch"], c["dataset"], label(c))].append(r)
+    return groups
+
+
+def mean_std(vals) -> tuple[float, float]:
+    a = np.asarray(vals, dtype=float)
+    return float(a.mean()), (float(a.std(ddof=1)) if len(a) > 1 else 0.0)
+
+
+def plot_convergence(runs: list[dict], out: str) -> None:
+    """One figure per (arch, dataset). Lines are the mean over seeds; bands are +/- 1 std."""
+    by_arch_ds = defaultdict(dict)
+    for (arch, ds, lbl), rs in group_by_config(runs).items():
+        by_arch_ds[(arch, ds)][lbl] = rs
+    for (arch, ds), series in by_arch_ds.items():
         fig, ax = plt.subplots(1, 3, figsize=(16, 4.5))
-        for r in rs:
-            ep = [e["epoch"] for e in r["epochs"]]
-            lbl = label(r["config"])
-            ls = "-" if r["config"]["framework"] == "numpy" else "--"
-            steps, losses = zip(*r["step_loss"]) if r["step_loss"] else ([], [])
-            ax[0].plot(steps, losses, ls, label=lbl, alpha=0.8)
-            ax[1].plot(ep, [e["test_loss"] for e in r["epochs"]], ls + "o", label=lbl)
-            ax[2].plot(ep, [100 * e["test_acc"] for e in r["epochs"]], ls + "o", label=lbl)
-        ax[0].set(title="training loss (per step)", xlabel="step", ylabel="cross-entropy", yscale="log")
-        ax[1].set(title="test loss", xlabel="epoch")
-        ax[2].set(title="test accuracy (%)", xlabel="epoch")
+        for lbl, rs in series.items():
+            ls = "-" if rs[0]["config"]["framework"] == "numpy" else "--"
+            lbl_n = f"{lbl} (n={len(rs)})"
+            # per-step loss: same logging schedule for every seed, so align by index
+            n_steps = min(len(r["step_loss"]) for r in rs)
+            steps = np.array([s for s, _ in rs[0]["step_loss"][:n_steps]])
+            losses = np.array([[l for _, l in r["step_loss"][:n_steps]] for r in rs])
+            ax[0].plot(steps, losses.mean(0), ls, label=lbl_n, alpha=0.8)
+            ep = [e["epoch"] for e in rs[0]["epochs"]]
+            tl = np.array([[e["test_loss"] for e in r["epochs"]] for r in rs])
+            ta = 100 * np.array([[e["test_acc"] for e in r["epochs"]] for r in rs])
+            for axis, y in ((ax[1], tl), (ax[2], ta)):
+                axis.plot(ep, y.mean(0), ls + "o", label=lbl_n, ms=4)
+                if len(rs) > 1:
+                    axis.fill_between(ep, y.mean(0) - y.std(0, ddof=1), y.mean(0) + y.std(0, ddof=1), alpha=0.15)
+        ax[0].set(title="training loss (per step, mean over seeds)", xlabel="step", ylabel="cross-entropy",
+                  yscale="log")
+        ax[1].set(title="test loss (mean ± std)", xlabel="epoch")
+        ax[2].set(title="test accuracy % (mean ± std)", xlabel="epoch")
         for a_ in ax:
             a_.grid(alpha=0.3)
         ax[2].legend(fontsize=8)
@@ -57,6 +81,21 @@ def plot_convergence(runs: list[dict], out: str) -> None:
         fig.savefig(path, dpi=130)
         plt.close(fig)
         print("wrote", path)
+
+
+def write_summary(runs: list[dict], out_md: str) -> None:
+    """Markdown table: final-epoch test accuracy/loss and train time, mean ± std over seeds."""
+    lines = ["| dataset | arch | impl / optimizer | seeds | final test acc (%) | final test loss | train time (s) |",
+             "|---|---|---|---|---|---|---|"]
+    for (arch, ds, lbl), rs in sorted(group_by_config(runs).items()):
+        acc_m, acc_s = mean_std([100 * r["epochs"][-1]["test_acc"] for r in rs])
+        loss_m, loss_s = mean_std([r["epochs"][-1]["test_loss"] for r in rs])
+        t_m, t_s = mean_std([r["train_seconds"] for r in rs])
+        lines.append(f"| {ds} | {arch} | {lbl} | {len(rs)} | {acc_m:.2f} ± {acc_s:.2f} | "
+                     f"{loss_m:.4f} ± {loss_s:.4f} | {t_m:.1f} ± {t_s:.1f} |")
+    with open(out_md, "w") as f:
+        f.write("\n".join(lines) + "\n")
+    print("wrote", out_md)
 
 
 def plot_benchmark(csv_path: str, out: str) -> None:
@@ -98,7 +137,10 @@ def main() -> None:
     p.add_argument("--out", default="results/figures")
     a = p.parse_args()
     os.makedirs(a.out, exist_ok=True)
-    plot_convergence(load_runs(a.runs), a.out)
+    runs = load_runs(a.runs)
+    if runs:
+        plot_convergence(runs, a.out)
+        write_summary(runs, os.path.join(os.path.dirname(a.out.rstrip("/")) or ".", "summary.md"))
     plot_benchmark(a.benchmark, a.out)
 
 
