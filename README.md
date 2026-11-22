@@ -65,7 +65,7 @@ src/nnbench/
 ├── flops.py               # analytic FLOPs / params / memory + ptflops/fvcore cross-check
 ├── profiling.py           # timers, tracemalloc, torch memory profiler
 └── cost.py                # dollars from measured time x hourly rate
-scripts/                   # train.py, benchmark.py, plot_results.py, cost_report.py
+scripts/                   # train.py, benchmark.py, profile_numpy.py, plot_results.py, cost_report.py
 tests/                     # gradcheck, torch parity, optimizer parity, training smoke tests
 configs/pricing.json       # cloud hourly rates (edit me)
 notebooks/                 # Colab quickstart
@@ -115,28 +115,73 @@ Both are defined once in `architectures.py` and instantiated in both frameworks.
 
 > Fill in after running `make all`. `results/benchmark.md` and `results/figures/` are generated automatically.
 
-Sample from a sandbox CPU run (batch 64, multithreaded, synthetic inputs; your hardware will differ):
+Measured on an Apple M4 (CPU only, multithreaded BLAS, batch 64, Adam, 20 timed repeats after warm-up; `results/benchmark.md`):
 
-| arch | dataset | impl | train step (ms) | inference (µs/sample) | achieved GFLOP/s |
+| arch | dataset | impl | params | fwd MFLOPs/sample | train step (ms) | inference (µs/sample) | achieved GFLOP/s | peak mem (MB) |
+|---|---|---|---|---|---|---|---|---|
+| MLP | MNIST | NumPy | 235,146 | 0.47 | 0.43 | 0.57 | 210 | 4.0 |
+| MLP | MNIST | PyTorch CPU | 235,146 | 0.47 | 0.44 | 0.51 | 205 | 5.1 |
+| CNN | MNIST | NumPy | 206,922 | 2.47 | 15.5 | 141 | 30 | 23.5 |
+| CNN | MNIST | PyTorch CPU | 206,922 | 2.47 | 6.5 | 20.1 | 73 | 53.6 |
+| MLP | CIFAR-10 | NumPy | 820,874 | 1.64 | 1.47 | 1.37 | 215 | 15.1 |
+| MLP | CIFAR-10 | PyTorch CPU | 820,874 | 1.64 | 0.91 | 1.39 | 347 | 16.2 |
+| CNN | CIFAR-10 | NumPy | 268,650 | 3.81 | 22.0 | 198 | 33 | 36.5 |
+| CNN | CIFAR-10 | PyTorch CPU | 268,650 | 3.81 | 9.6 | 46.3 | 76 | 69.9 |
+
+The analytic FLOP counts match `ptflops` and `fvcore` (MLP MNIST: 235,146 params, 235,914 MACs from `ptflops`).
+
+**Single thread vs multi thread** (`results/single_thread/benchmark.md`, `OMP/OPENBLAS_NUM_THREADS=1`): the NumPy CNN CIFAR-10 step is 22.1 ms single-threaded versus 22.0 ms multithreaded, and PyTorch's is 11.1 ms versus 9.6 ms. On this machine the batch-64 matrices are too small for BLAS threading to help the NumPy side, so the numbers are nearly identical.
+
+**Where the NumPy CNN time goes** (cProfile over 50 CIFAR-10 training steps, `results/profile_cnn_cifar10.txt`, one-step ≈ 22 ms):
+
+| operation | share of profiled time |
+|---|---|
+| `col2im` (scatter-add in conv and pool backward) | 26% |
+| `argmax` (max-pool forward) | 18% |
+| `reshape` / transpose copies | 13% |
+| `im2col` (patch unfolding) | 11% |
+| `put_along_axis` / `take_along_axis` (pool routing) | 12% |
+| remaining Python and layer bodies, including the GEMMs | ~20% |
+
+cProfile does not record the `@` operator separately, so the matrix multiplies sit inside the layer bodies in the last row. The shares are approximate because cProfile adds per-call overhead. The main finding is that about 80% of the NumPy CNN's time is memory movement (unfolding, scatter-add, copies, and argmax), not arithmetic. Pooling is a large share on its own, because it is implemented through `im2col` plus `argmax` rather than a direct kernel.
+
+Takeaway: the from-scratch MLP is within ~1–1.6× of PyTorch on training steps, because both are dominated by the same BLAS GEMMs. The CNN is ~2.3–2.4× slower on training steps, and ~7× slower on MNIST inference, which comes from im2col memory traffic and Python-level overhead, which PyTorch avoids with fused convolution kernels (oneDNN on CPU, cuDNN on GPU).
+
+### Accuracy and convergence (3 seeds × 10 epochs, CPU)
+
+Full table: `results/summary.md`. Mean ± std over seeds, final epoch, test set:
+
+| dataset | arch | NumPy (from scratch), best optimizer | PyTorch, best optimizer | NumPy train time (s) | PyTorch train time (s) |
 |---|---|---|---|---|---|
-| MLP | MNIST | NumPy | 2.6 | 5.5 | 35 |
-| MLP | MNIST | PyTorch CPU | 1.8 | 3.0 | 50 |
-| CNN | MNIST | NumPy | 53 | 399 | 8.9 |
-| CNN | MNIST | PyTorch CPU | 10.4 | 79 | 46 |
-| CNN | CIFAR-10 | NumPy | 77 | 619 | 9.5 |
-| CNN | CIFAR-10 | PyTorch CPU | 23.9 | 115 | 31 |
+| MNIST | MLP | 98.20 ± 0.12% (momentum) | 98.17 ± 0.02% (momentum) | 1.9–4.3 | 2.5–4.8 |
+| MNIST | CNN | 98.96 ± 0.17% (momentum) | 98.94 ± 0.18% (momentum) | 136–142 | 63–67 |
+| CIFAR-10 | MLP | 50.98 ± 0.13% (adam) | 50.85 ± 0.34% (adam) | 5–14 | 5–12 |
+| CIFAR-10 | CNN | 67.45 ± 0.52% (adam) | 67.63 ± 0.26% (adam) | 181–219 | 80–118 |
 
-Early takeaway: the from-scratch MLP stays within ~1.5–2.5× of PyTorch because both are dominated by the same BLAS GEMMs, while the CNN gap (~3–5×) comes from im2col memory traffic and Python-level overhead that PyTorch avoids with fused convolution kernels (oneDNN on CPU, cuDNN on GPU).
+Figures: `results/figures/convergence_{mlp,cnn}_{mnist,cifar10}.png` (mean over seeds, ±1 std bands). The benchmark plot is `results/figures/benchmark.png`.
+
+**What the results show**
+- **The from-scratch implementation matches PyTorch on accuracy.** For the best optimizer in each row, the two frameworks differ by less than 0.2 points. Across all optimizers, the gaps are mostly within one standard deviation.
+- **Optimizers differ little in final accuracy.** On MNIST all four are within about 0.6% for each architecture. On CIFAR-10 the CNN's ranking is Adam ≈ momentum > SGD ≈ RMSProp by roughly 2–3 points, and the spread across seeds is comparable to those gaps.
+- **Test loss is lowest around epochs 3–6 and then rises** on CIFAR-10, while accuracy plateaus. The network is overfitting the training set. There is no augmentation or regularization here, so this is expected.
+- **Training is 2–3× slower in NumPy** for the CNN (about 180–220 s versus 80–120 s for 10 epochs on CIFAR-10), and the gap is larger for inference (see the benchmark above). The MLP training time is close to PyTorch's.
+
+**Limitations**
+- Everything was measured on a single Apple M4 CPU. The Colab GPU runs in the checklist have not been done.
+- Only 3 seeds were used, so differences of under about 1 point should not be read as real.
+- Trained weights are not saved, only the training histories in `results/runs/`. The `scripts/train.py` script discards the model after each run.
 
 ## Project checklist
 
 - [x] NumPy layers, loss, optimizers + gradient checks
 - [x] PyTorch mirror + parity tests
 - [x] Training / benchmark / plotting / cost scripts
-- [ ] Full MNIST + CIFAR-10 runs (≥ 3 seeds) on CPU and Colab GPU
-- [ ] Single-thread vs multi-thread benchmark comparison
-- [ ] cProfile breakdown of the NumPy CNN (where does the time go?)
-- [ ] Final report: plots, tables, discussion
+- [x] Full MNIST runs (3 seeds × 10 epochs, CPU)
+- [x] Full CIFAR-10 runs (3 seeds × 10 epochs, CPU)
+- [ ] Colab GPU runs of the same grid
+- [x] Single-thread vs multi-thread benchmark comparison
+- [x] cProfile breakdown of the NumPy CNN (`scripts/profile_numpy.py`)
+- [x] Final report: plots, tables, discussion
 
 ## References
 
