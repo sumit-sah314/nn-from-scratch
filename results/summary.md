@@ -1,0 +1,34 @@
+| dataset | arch | impl / optimizer | seeds | final test acc (%) | final test loss | train time (s) |
+|---|---|---|---|---|---|---|
+| cifar10 | cnn | numpy-cpu / adam | 3 | 67.45 ± 0.52 | 1.1302 ± 0.0236 | 219.1 ± 41.9 |
+| cifar10 | cnn | numpy-cpu / momentum | 3 | 67.35 ± 1.15 | 1.3134 ± 0.0482 | 180.9 ± 31.9 |
+| cifar10 | cnn | numpy-cpu / rmsprop | 3 | 64.21 ± 1.69 | 1.4997 ± 0.1506 | 190.9 ± 42.7 |
+| cifar10 | cnn | numpy-cpu / sgd | 3 | 64.58 ± 1.61 | 1.2570 ± 0.0530 | 188.4 ± 43.5 |
+| cifar10 | cnn | torch-cpu / adam | 3 | 67.63 ± 0.26 | 1.0878 ± 0.0796 | 92.5 ± 12.1 |
+| cifar10 | cnn | torch-cpu / momentum | 3 | 67.35 ± 0.15 | 1.2381 ± 0.0368 | 83.5 ± 9.7 |
+| cifar10 | cnn | torch-cpu / rmsprop | 3 | 65.18 ± 1.30 | 1.4224 ± 0.2078 | 80.0 ± 7.5 |
+| cifar10 | cnn | torch-cpu / sgd | 3 | 64.28 ± 1.45 | 1.2741 ± 0.1188 | 118.0 ± 8.8 |
+| mnist | cnn | numpy-cpu / adam | 3 | 98.89 ± 0.08 | 0.0428 ± 0.0062 | 141.6 ± 8.6 |
+| mnist | cnn | numpy-cpu / momentum | 3 | 98.96 ± 0.17 | 0.0372 ± 0.0057 | 136.0 ± 2.3 |
+| mnist | cnn | numpy-cpu / rmsprop | 3 | 98.85 ± 0.07 | 0.0521 ± 0.0081 | 136.4 ± 1.1 |
+| mnist | cnn | numpy-cpu / sgd | 3 | 98.87 ± 0.21 | 0.0367 ± 0.0073 | 135.7 ± 1.1 |
+| mnist | cnn | torch-cpu / adam | 3 | 98.76 ± 0.15 | 0.0514 ± 0.0052 | 67.1 ± 5.4 |
+| mnist | cnn | torch-cpu / momentum | 3 | 98.94 ± 0.18 | 0.0393 ± 0.0044 | 63.3 ± 5.8 |
+| mnist | cnn | torch-cpu / rmsprop | 3 | 98.88 ± 0.18 | 0.0505 ± 0.0075 | 66.8 ± 8.5 |
+| mnist | cnn | torch-cpu / sgd | 3 | 98.52 ± 0.39 | 0.0475 ± 0.0148 | 66.3 ± 10.1 |
+| cifar10 | mlp | numpy-cpu / adam | 3 | 50.98 ± 0.13 | 1.4976 ± 0.0121 | 14.2 ± 3.7 |
+| cifar10 | mlp | numpy-cpu / momentum | 3 | 50.55 ± 0.59 | 1.5354 ± 0.0247 | 6.1 ± 1.6 |
+| cifar10 | mlp | numpy-cpu / rmsprop | 3 | 49.32 ± 0.75 | 1.5780 ± 0.0422 | 9.7 ± 2.3 |
+| cifar10 | mlp | numpy-cpu / sgd | 3 | 49.04 ± 1.47 | 1.6450 ± 0.0827 | 5.0 ± 1.5 |
+| cifar10 | mlp | torch-cpu / adam | 3 | 50.85 ± 0.34 | 1.4828 ± 0.0062 | 12.2 ± 2.4 |
+| cifar10 | mlp | torch-cpu / momentum | 3 | 50.24 ± 0.54 | 1.5462 ± 0.0103 | 6.6 ± 2.3 |
+| cifar10 | mlp | torch-cpu / rmsprop | 3 | 49.62 ± 0.63 | 1.5611 ± 0.0133 | 6.8 ± 1.5 |
+| cifar10 | mlp | torch-cpu / sgd | 3 | 49.31 ± 0.35 | 1.6166 ± 0.0263 | 4.7 ± 1.2 |
+| mnist | mlp | numpy-cpu / adam | 3 | 97.61 ± 0.07 | 0.0972 ± 0.0050 | 4.3 ± 0.1 |
+| mnist | mlp | numpy-cpu / momentum | 3 | 98.20 ± 0.12 | 0.0689 ± 0.0048 | 2.3 ± 0.1 |
+| mnist | mlp | numpy-cpu / rmsprop | 3 | 97.83 ± 0.11 | 0.1139 ± 0.0119 | 3.4 ± 0.1 |
+| mnist | mlp | numpy-cpu / sgd | 3 | 97.86 ± 0.07 | 0.0723 ± 0.0008 | 1.9 ± 0.0 |
+| mnist | mlp | torch-cpu / adam | 3 | 97.84 ± 0.13 | 0.1046 ± 0.0135 | 4.8 ± 1.6 |
+| mnist | mlp | torch-cpu / momentum | 3 | 98.17 ± 0.02 | 0.0705 ± 0.0036 | 3.2 ± 0.8 |
+| mnist | mlp | torch-cpu / rmsprop | 3 | 97.51 ± 0.09 | 0.1186 ± 0.0034 | 3.8 ± 0.9 |
+| mnist | mlp | torch-cpu / sgd | 3 | 97.84 ± 0.07 | 0.0753 ± 0.0046 | 2.5 ± 0.7 |
