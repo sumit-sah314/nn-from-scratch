@@ -1,0 +1,67 @@
+# 50 training steps, batch 64, cnn on cifar10 shapes
+         17651 function calls in 1.093 seconds
+
+   Ordered by: internal time
+   List reduced from 83 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      200    0.278    0.001    0.283    0.001 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/layers.py:128(col2im)
+      100    0.199    0.002    0.199    0.002 {method 'argmax' of 'numpy.ndarray' objects}
+     2000    0.141    0.000    0.141    0.000 {method 'reshape' of 'numpy.ndarray' objects}
+      200    0.105    0.001    0.117    0.001 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/layers.py:108(im2col)
+      100    0.069    0.001    0.070    0.001 /private/tmp/claude-501/-Users-sumanach-Documents-Computer-Vision-nn-from-scratch/92f6f163-8e35-4d49-955d-cf22f1ef67bf/scratchpad/venv/lib/python3.14/site-packages/numpy/lib/_shape_base_impl.py:186(put_along_axis)
+      100    0.066    0.001    0.068    0.001 /private/tmp/claude-501/-Users-sumanach-Documents-Computer-Vision-nn-from-scratch/92f6f163-8e35-4d49-955d-cf22f1ef67bf/scratchpad/venv/lib/python3.14/site-packages/numpy/lib/_shape_base_impl.py:60(take_along_axis)
+      100    0.049    0.000    0.213    0.002 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/layers.py:159(forward)
+      100    0.041    0.000    0.277    0.003 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/layers.py:170(backward)
+      150    0.040    0.000    0.040    0.000 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/layers.py:78(forward)
+      150    0.028    0.000    0.028    0.000 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/layers.py:82(backward)
+      450    0.023    0.000    0.023    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+      400    0.019    0.000    0.019    0.000 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/optim.py:91(_update)
+      300    0.008    0.000    0.008    0.000 {built-in method numpy.zeros}
+      100    0.005    0.000    0.005    0.000 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/layers.py:64(backward)
+      100    0.005    0.000    0.005    0.000 /private/tmp/claude-501/-Users-sumanach-Documents-Computer-Vision-nn-from-scratch/92f6f163-8e35-4d49-955d-cf22f1ef67bf/scratchpad/venv/lib/python3.14/site-packages/numpy/lib/_arraypad_impl.py:87(_pad_simple)
+      400    0.003    0.000    0.003    0.000 /private/tmp/claude-501/-Users-sumanach-Documents-Computer-Vision-nn-from-scratch/92f6f163-8e35-4d49-955d-cf22f1ef67bf/scratchpad/venv/lib/python3.14/site-packages/numpy/lib/_arraypad_impl.py:130(_set_pad_area)
+      100    0.003    0.000    0.003    0.000 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/layers.py:60(forward)
+      200    0.001    0.000    0.002    0.000 /private/tmp/claude-501/-Users-sumanach-Documents-Computer-Vision-nn-from-scratch/92f6f163-8e35-4d49-955d-cf22f1ef67bf/scratchpad/venv/lib/python3.14/site-packages/numpy/lib/_shape_base_impl.py:33(_make_along_axis_idx)
+      100    0.001    0.000    0.012    0.000 /private/tmp/claude-501/-Users-sumanach-Documents-Computer-Vision-nn-from-scratch/92f6f163-8e35-4d49-955d-cf22f1ef67bf/scratchpad/venv/lib/python3.14/site-packages/numpy/lib/_arraypad_impl.py:546(pad)
+      100    0.001    0.000    0.001    0.000 /private/tmp/claude-501/-Users-sumanach-Documents-Computer-Vision-nn-from-scratch/92f6f163-8e35-4d49-955d-cf22f1ef67bf/scratchpad/venv/lib/python3.14/site-packages/numpy/lib/_stride_tricks_impl.py:447(_broadcast_to)
+       50    0.001    0.000    0.002    0.000 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/losses.py:14(forward)
+      700    0.001    0.000    0.001    0.000 {built-in method numpy.arange}
+      200    0.001    0.000    0.003    0.000 /private/tmp/claude-501/-Users-sumanach-Documents-Computer-Vision-nn-from-scratch/92f6f163-8e35-4d49-955d-cf22f1ef67bf/scratchpad/venv/lib/python3.14/site-packages/numpy/lib/_arraypad_impl.py:471(_as_pairs)
+      100    0.000    0.000    0.333    0.003 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/layers.py:198(forward)
+       50    0.000    0.000    0.482    0.010 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/model.py:20(backward)
+
+
+         17651 function calls in 1.093 seconds
+
+   Ordered by: cumulative time
+   List reduced from 83 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       50    0.000    0.000    1.093    0.022 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/scripts/profile_numpy.py:44(step)
+       50    0.000    0.000    0.590    0.012 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/model.py:13(forward)
+       50    0.000    0.000    0.482    0.010 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/model.py:20(backward)
+      100    0.000    0.000    0.333    0.003 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/layers.py:198(forward)
+      200    0.278    0.001    0.283    0.001 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/layers.py:128(col2im)
+      100    0.041    0.000    0.277    0.003 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/layers.py:170(backward)
+      100    0.049    0.000    0.213    0.002 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/layers.py:159(forward)
+      100    0.199    0.002    0.199    0.002 {method 'argmax' of 'numpy.ndarray' objects}
+      100    0.000    0.000    0.171    0.002 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/layers.py:208(backward)
+     2000    0.141    0.000    0.141    0.000 {method 'reshape' of 'numpy.ndarray' objects}
+      200    0.105    0.001    0.117    0.001 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/layers.py:108(im2col)
+      100    0.069    0.001    0.070    0.001 /private/tmp/claude-501/-Users-sumanach-Documents-Computer-Vision-nn-from-scratch/92f6f163-8e35-4d49-955d-cf22f1ef67bf/scratchpad/venv/lib/python3.14/site-packages/numpy/lib/_shape_base_impl.py:186(put_along_axis)
+      100    0.066    0.001    0.068    0.001 /private/tmp/claude-501/-Users-sumanach-Documents-Computer-Vision-nn-from-scratch/92f6f163-8e35-4d49-955d-cf22f1ef67bf/scratchpad/venv/lib/python3.14/site-packages/numpy/lib/_shape_base_impl.py:60(take_along_axis)
+      150    0.040    0.000    0.040    0.000 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/layers.py:78(forward)
+      150    0.028    0.000    0.028    0.000 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/layers.py:82(backward)
+      450    0.023    0.000    0.023    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+      250    0.000    0.000    0.023    0.000 {method 'sum' of 'numpy.ndarray' objects}
+      250    0.000    0.000    0.023    0.000 /private/tmp/claude-501/-Users-sumanach-Documents-Computer-Vision-nn-from-scratch/92f6f163-8e35-4d49-955d-cf22f1ef67bf/scratchpad/venv/lib/python3.14/site-packages/numpy/_core/_methods.py:47(_sum)
+       50    0.000    0.000    0.019    0.000 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/optim.py:27(step)
+      400    0.019    0.000    0.019    0.000 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/optim.py:91(_update)
+      100    0.001    0.000    0.012    0.000 /private/tmp/claude-501/-Users-sumanach-Documents-Computer-Vision-nn-from-scratch/92f6f163-8e35-4d49-955d-cf22f1ef67bf/scratchpad/venv/lib/python3.14/site-packages/numpy/lib/_arraypad_impl.py:546(pad)
+      300    0.008    0.000    0.008    0.000 {built-in method numpy.zeros}
+      100    0.005    0.000    0.005    0.000 /Users/sumanach/Documents/Computer Vision/nn-from-scratch/src/nnbench/numpy_nn/layers.py:64(backward)
+      100    0.005    0.000    0.005    0.000 /private/tmp/claude-501/-Users-sumanach-Documents-Computer-Vision-nn-from-scratch/92f6f163-8e35-4d49-955d-cf22f1ef67bf/scratchpad/venv/lib/python3.14/site-packages/numpy/lib/_arraypad_impl.py:87(_pad_simple)
+      400    0.003    0.000    0.003    0.000 /private/tmp/claude-501/-Users-sumanach-Documents-Computer-Vision-nn-from-scratch/92f6f163-8e35-4d49-955d-cf22f1ef67bf/scratchpad/venv/lib/python3.14/site-packages/numpy/lib/_arraypad_impl.py:130(_set_pad_area)
+
+
