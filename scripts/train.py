@@ -41,14 +41,24 @@ def main() -> None:
     common = dict(arch=a.arch, optimizer=a.optimizer, lr=lr, epochs=a.epochs, batch_size=a.batch_size,
                   seed=a.seed, weight_decay=a.weight_decay)
     hist = train_numpy(ds, **common) if a.framework == "numpy" else train_torch(ds, device=a.device, **common)
-    hist.pop("model")
+    model = hist.pop("model")
 
     os.makedirs(a.out, exist_ok=True)
     dev = hist["config"]["device"].split(":")[0]
-    path = os.path.join(a.out, f"{a.framework}-{dev}_{a.arch}_{ds.name}_{a.optimizer}_s{a.seed}.json")
+    stem = os.path.join(a.out, f"{a.framework}-{dev}_{a.arch}_{ds.name}_{a.optimizer}_s{a.seed}")
+    path = stem + ".json"
     with open(path, "w") as f:
         json.dump(hist, f, indent=1)
     print(f"saved {path}  (train time {hist['train_seconds']:.1f}s)")
+
+    if a.framework == "numpy":
+        weights = stem + ".npz"
+        model.save(weights)
+    else:
+        import torch
+        weights = stem + ".pt"
+        torch.save(model.state_dict(), weights)
+    print(f"saved weights {weights}")
 
 
 if __name__ == "__main__":
