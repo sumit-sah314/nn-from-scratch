@@ -16,6 +16,14 @@ We implement a fully connected network (MLP), a convolutional network (CNN), and
 [![tests](https://github.com/sumit-sah314/nn-from-scratch/actions/workflows/tests.yml/badge.svg)](https://github.com/sumit-sah314/nn-from-scratch/actions)
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sumit-sah314/nn-from-scratch/blob/main/notebooks/colab_quickstart.ipynb)
 
+![Streamlit dashboard: run metrics, training curves and confusion matrix](docs/dashboard-explore.png)
+
+**Highlights**
+- Forward and backward passes, im2col convolution, max-pooling and four optimizers written by hand in NumPy, checked against finite differences and against `torch.optim`.
+- The same MLP and CNN are rebuilt in PyTorch from one shared spec, so the comparison is between identical models.
+- A Streamlit dashboard trains either implementation, saves each model's weights, and compares runs side by side.
+- Full MNIST and CIFAR-10 grids (3 seeds × 10 epochs), with timing, memory, FLOP and cost tables.
+
 ---
 
 ## Correctness first
@@ -26,8 +34,10 @@ A speed comparison is meaningless if the two implementations compute different t
 - **Framework parity** (`tests/test_torch_parity.py`): with weights copied across, the NumPy and PyTorch MLP/CNN produce identical logits, loss and **every parameter gradient** (rtol 1e-7) on both MNIST and CIFAR-10 input shapes.
 - **Optimizer parity** (`tests/test_optim_parity.py`): each from-scratch optimizer, with and without weight decay, matches `torch.optim` after 25 steps to 1e-10.
 
+- **Weight round trip** (`tests/test_checkpoint.py`): saved NumPy weights reload into a fresh model and reproduce its outputs exactly.
+
 ```bash
-pytest -q        # 23 tests, ~5 s on CPU
+pytest -q        # 24 tests, ~5 s on CPU (torch tests run when torch is installed)
 ```
 
 ## Quickstart
@@ -35,7 +45,7 @@ pytest -q        # 23 tests, ~5 s on CPU
 ```bash
 git clone https://github.com/sumit-sah314/nn-from-scratch.git
 cd nn-from-scratch
-pip install -e ".[torch,dev]"          # or: pip install -r requirements.txt && pip install -e .
+pip install -e ".[torch,dev,dashboard]"   # or: pip install -r requirements.txt && pip install -e .
 
 make smoke                              # offline end-to-end run on synthetic data
 python scripts/train.py --framework numpy --arch cnn --dataset mnist --optimizer adam --epochs 5
@@ -43,9 +53,31 @@ python scripts/train.py --framework torch --arch cnn --dataset mnist --optimizer
 python scripts/benchmark.py             # timing / memory / FLOPs table
 python scripts/plot_results.py          # figures -> results/figures/
 python scripts/cost_report.py --scale-epochs 20
+streamlit run dashboard/app.py          # interactive dashboard (see below)
 ```
 
 Datasets download automatically on first use (no torchvision needed) and are cached as normalised `.npz` arrays in `data/`. Both frameworks train on exactly the same arrays.
+
+## Dashboard
+
+```bash
+streamlit run dashboard/app.py
+```
+
+- **Train** either implementation from the sidebar: NumPy (from scratch) or PyTorch (built-in), on MNIST or CIFAR-10, with the MLP or CNN, any of the four optimizers, and your own learning rate, epochs and batch size. Training output streams into the page.
+- **Explore runs** shows the summary metrics, a per-run figure (step loss, epoch loss, epoch accuracy), the confusion matrix, and download buttons for the history and the weights.
+- **Compare** puts runs side by side in a table and an accuracy-per-epoch chart. It warns when the runs use different datasets or architectures, since those numbers are not comparable.
+- **Benchmark figures** shows the generated plots from `results/figures/`.
+
+Each training run is saved under `results/runs/dashboard/<timestamp>/`:
+
+| file | contents |
+|---|---|
+| `history.json` | config, per-step loss, per-epoch metrics, confusion matrix |
+| `weights.npz` / `weights.pt` | trained parameters (NumPy arrays / PyTorch `state_dict`) |
+| `run_curves.png`, `confusion_matrix.png` | the figures shown in the dashboard |
+
+`scripts/train.py` saves the same weights next to its JSON history.
 
 `make all` runs the full grid: 2 frameworks × 2 architectures × 2 datasets × 4 optimizers, then benchmarks, plots and the cost report. On Colab, open `notebooks/colab_quickstart.ipynb` with a T4 GPU runtime to get CPU and GPU numbers in one session.
 
@@ -66,9 +98,11 @@ src/nnbench/
 ├── profiling.py           # timers, tracemalloc, torch memory profiler
 └── cost.py                # dollars from measured time x hourly rate
 scripts/                   # train.py, benchmark.py, profile_numpy.py, plot_results.py, cost_report.py
-tests/                     # gradcheck, torch parity, optimizer parity, training smoke tests
+dashboard/                 # Streamlit app (app.py) and its training runner (run_training.py)
+tests/                     # gradcheck, torch parity, optimizer parity, checkpoints, training smoke tests
 configs/pricing.json       # cloud hourly rates (edit me)
 notebooks/                 # Colab quickstart
+docs/                      # screenshots used in this README
 ```
 
 ## Architectures
@@ -113,7 +147,7 @@ Both are defined once in `architectures.py` and instantiated in both frameworks.
 
 ## Results
 
-> Fill in after running `make all`. `results/benchmark.md` and `results/figures/` are generated automatically.
+`results/benchmark.md` and `results/figures/` are generated automatically by `make all`.
 
 Measured on an Apple M4 (CPU only, multithreaded BLAS, batch 64, Adam, 20 timed repeats after warm-up; `results/benchmark.md`):
 
@@ -169,7 +203,7 @@ Figures: `results/figures/convergence_{mlp,cnn}_{mnist,cifar10}.png` (mean over 
 **Limitations**
 - Everything was measured on a single Apple M4 CPU. The Colab GPU runs in the checklist have not been done.
 - Only 3 seeds were used, so differences of under about 1 point should not be read as real.
-- Trained weights are not saved, only the training histories in `results/runs/`. The `scripts/train.py` script discards the model after each run.
+- Weights are saved for runs made after this feature was added (dashboard runs and `scripts/train.py`). The runs in `results/runs/` from before then contain only their histories.
 
 ## Project checklist
 
@@ -182,6 +216,8 @@ Figures: `results/figures/convergence_{mlp,cnn}_{mnist,cifar10}.png` (mean over 
 - [x] Single-thread vs multi-thread benchmark comparison
 - [x] cProfile breakdown of the NumPy CNN (`scripts/profile_numpy.py`)
 - [x] Final report: plots, tables, discussion
+- [x] Streamlit dashboard: train either implementation, inspect and compare runs
+- [x] Trained weights saved for every new run (NumPy `.npz`, PyTorch `.pt`)
 
 ## References
 
