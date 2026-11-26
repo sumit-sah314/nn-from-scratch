@@ -8,7 +8,6 @@ Fair-timing rules applied throughout:
 """
 from __future__ import annotations
 
-import resource
 import statistics
 import sys
 import time
@@ -77,5 +76,28 @@ def torch_peak_memory(fn: Callable[[], object], device: str) -> float:
 
 def peak_rss_mb() -> float:
     """Process-lifetime peak resident set size (coarse, but framework-agnostic)."""
+    if sys.platform == "win32":
+        # `resource` is Unix-only; use the peak working set from the Win32 API.
+        import ctypes
+        from ctypes import wintypes
+
+        class PROCESS_MEMORY_COUNTERS(ctypes.Structure):
+            _fields_ = [("cb", wintypes.DWORD), ("PageFaultCount", wintypes.DWORD),
+                        ("PeakWorkingSetSize", ctypes.c_size_t), ("WorkingSetSize", ctypes.c_size_t),
+                        ("QuotaPeakPagedPoolUsage", ctypes.c_size_t), ("QuotaPagedPoolUsage", ctypes.c_size_t),
+                        ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t), ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+                        ("PagefileUsage", ctypes.c_size_t), ("PeakPagefileUsage", ctypes.c_size_t)]
+
+        counters = PROCESS_MEMORY_COUNTERS()
+        counters.cb = ctypes.sizeof(counters)
+        psapi = ctypes.WinDLL("psapi")
+        psapi.GetProcessMemoryInfo.argtypes = [wintypes.HANDLE, ctypes.POINTER(PROCESS_MEMORY_COUNTERS), wintypes.DWORD]
+        handle = ctypes.windll.kernel32.GetCurrentProcess()
+        if not psapi.GetProcessMemoryInfo(handle, ctypes.byref(counters), counters.cb):
+            return float("nan")
+        return counters.PeakWorkingSetSize / 2**20
+
+    import resource
+
     r = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     return r / 2**20 if sys.platform == "darwin" else r / 2**10
