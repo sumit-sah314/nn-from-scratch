@@ -1,0 +1,10 @@
+# Dependencies for the Streamlit dashboard on Streamlit Community Cloud.
+# Cloud reads this file (next to app.py) instead of the full requirements.txt
+# at the repo root, which stays the complete list for local development.
+# The CPU-only PyTorch build avoids downloading the CUDA libraries Cloud can't use.
+--extra-index-url https://download.pytorch.org/whl/cpu
+streamlit>=1.50
+numpy>=1.24
+matplotlib>=3.7
+filelock>=3.12
+torch>=2.0
