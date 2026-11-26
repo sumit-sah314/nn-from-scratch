@@ -68,6 +68,9 @@ streamlit run dashboard/app.py
 - **Explore runs** shows the summary metrics, a per-run figure (step loss, epoch loss, epoch accuracy), the confusion matrix, and download buttons for the history and the weights.
 - **Compare** puts runs side by side in a table and an accuracy-per-epoch chart. It warns when the runs use different datasets or architectures, since those numbers are not comparable.
 - **Benchmark figures** shows the generated plots from `results/figures/`.
+- **Light and dark themes** are set in `.streamlit/config.toml`. The app follows the system setting, and you can switch in the app menu (⋮ → Settings → Theme).
+
+Each run trains in its own process. Start one run at a time: several runs at once compete for the CPU and all slow down.
 
 Each training run is saved under `results/runs/dashboard/<timestamp>/`:
 
@@ -78,6 +81,12 @@ Each training run is saved under `results/runs/dashboard/<timestamp>/`:
 | `run_curves.png`, `confusion_matrix.png` | the figures shown in the dashboard |
 
 `scripts/train.py` saves the same weights next to its JSON history.
+
+### Deploying to Streamlit Community Cloud
+
+Create an app from this repository with **`dashboard/app.py`** as the main file. Cloud installs `dashboard/requirements.txt` (the file next to the app), which lists only what the dashboard needs and the CPU-only PyTorch build. The root `requirements.txt` stays the full list for local development. The dashboard finds `nnbench` in `src/` on its own, so the package does not need to be installed. Runs trained on Cloud are saved on the app's temporary disk and disappear when it restarts, so download the history and weights you want to keep.
+
+`.devcontainer/` opens the repository in GitHub Codespaces with the dependencies installed and the dashboard running.
 
 `make all` runs the full grid: 2 frameworks × 2 architectures × 2 datasets × 4 optimizers, then benchmarks, plots and the cost report. On Colab, open `notebooks/colab_quickstart.ipynb` with a T4 GPU runtime to get CPU and GPU numbers in one session.
 
@@ -99,6 +108,8 @@ src/nnbench/
 └── cost.py                # dollars from measured time x hourly rate
 scripts/                   # train.py, benchmark.py, profile_numpy.py, plot_results.py, cost_report.py
 dashboard/                 # Streamlit app (app.py) and its training runner (run_training.py)
+.streamlit/config.toml     # dashboard light and dark themes
+.devcontainer/             # GitHub Codespaces setup
 tests/                     # gradcheck, torch parity, optimizer parity, checkpoints, training smoke tests
 configs/pricing.json       # cloud hourly rates (edit me)
 notebooks/                 # Colab quickstart
