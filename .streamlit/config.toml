@@ -1,0 +1,16 @@
+# Light and dark themes: the app follows the viewer's system setting, and either
+# can be picked from the app menu (⋮ → Settings → Theme).
+[theme]
+font = "sans serif"
+
+[theme.light]
+primaryColor = "#1f6feb"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f4f6f9"
+textColor = "#1d2430"
+
+[theme.dark]
+primaryColor = "#58a6ff"
+backgroundColor = "#0e1117"
+secondaryBackgroundColor = "#1a1f29"
+textColor = "#e6edf3"
