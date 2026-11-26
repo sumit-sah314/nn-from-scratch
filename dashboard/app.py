@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -70,9 +71,12 @@ def launch_training(config: dict) -> Path | None:
         "--out", str(out), "--data-root", str(ROOT / "data"), "--config", json.dumps(config),
     ]
     # Unbuffered stdout carries the trainer's existing epoch logs into the UI.
+    # Force UTF-8 in the child: on Windows its piped stdout otherwise defaults to the
+    # ANSI code page (cp1252), so "…" arrives as a byte that decodes to "�" below.
+    env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
     with st.status("Training in progress", expanded=True) as status:
         try:
-            with subprocess.Popen(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            with subprocess.Popen(command, cwd=ROOT, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                   text=True, encoding="utf-8", errors="replace") as process:
                 for line in process.stdout:
                     status.text(line.rstrip())
