@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -11,8 +12,16 @@ from filelock import FileLock
 from matplotlib.figure import Figure
 from matplotlib.ticker import MaxNLocator, PercentFormatter
 
-from nnbench.data import batches, load
-from nnbench.training import train_numpy, train_torch
+ROOT = Path(__file__).resolve().parents[1]
+# This runs as its own process (`python -m dashboard.run_training`), so it does not
+# inherit app.py's sys.path changes. Where nnbench isn't pip-installed (e.g. Streamlit
+# Community Cloud, which only installs requirements.txt), add src/ and the repo root.
+for path in (ROOT, ROOT / "src"):
+    if str(path) not in sys.path:
+        sys.path.insert(0, str(path))
+
+from nnbench.data import batches, load  # noqa: E402
+from nnbench.training import train_numpy, train_torch  # noqa: E402
 
 
 CIFAR10_LABELS = ("airplane", "automobile", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck")
