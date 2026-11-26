@@ -6,10 +6,11 @@ __pycache__/
 .venv/
 venv/
 data/
-results/runs/
-results/figures/
-results/*.csv
-results/*.md
+# Generated results: ignore everything new under results/. The published tables,
+# figures and profile already in git stay tracked (add new ones with `git add -f`).
+results/*
 !results/README.md
 *.npz
 .DS_Store
+# Claude Code local worktrees and settings
+.claude/
